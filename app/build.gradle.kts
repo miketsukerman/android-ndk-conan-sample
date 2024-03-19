@@ -1,63 +1,18 @@
-import java.io.IOException
 
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
-}
-
-fun String.runCommand(workingDir: File
-, timeoutAmount: Long = 60,
-timeoutUnit: TimeUnit = TimeUnit.SECONDS): String? {
-    try {
-        val parts = this.split("\\s".toRegex())
-
-        println(parts)
-
-        val proc = ProcessBuilder(*parts.toTypedArray())
-                .directory(workingDir)
-                .redirectOutput(ProcessBuilder.Redirect.PIPE)
-                .redirectError(ProcessBuilder.Redirect.PIPE)
-                .apply { waitFor(timeoutAmount, timeoutUnit) }
-    .run {
-        val error = errorStream.bufferedReader().readText().trim()
-        if (error.isNotEmpty()) {
-            throw IOException(error)
-        }
-        inputStream.bufferedReader().readText().trim()
-    }
-
-        return proc.inputStream.bufferedReader().readText()
-    } catch(e: IOException) {
-        e.printStackTrace()
-        return null
-    }
-}
-
-task("conanInstall") {
-    val workDir = File("app/build")
-    buildDir.mkdirs()
-    listOf<String>("Debug","Release").forEach {build_type ->
-        listOf("armv7", "armv8", "x86", "x86_64").forEach {arch ->
-            val command = "conan install ../../src/main/cpp --profile android " + 
-                    "--output-folder " + workDir + " " +
-                    "-s build_type=" + build_type + " -s arch=" + arch + " --build missing " + 
-                    "-c \"tools.cmake.cmake_layout:build_folder_vars=['settings.arch']\""
-
-            val out = command.runCommand(workDir)
-
-            println(out)
-        }
-    }
+    id("conan.io") version "1.0-SNAPSHOT"
 }
 
 android {
     namespace = "com.example.myapp"
-    compileSdk = 33
+    compileSdk = 34
 
     defaultConfig {
         applicationId = "com.example.myapp"
         minSdk = 33
-        targetSdk = 33
+        targetSdk = 34
         versionCode = 1
         versionName = "1.0"
 
@@ -65,10 +20,29 @@ android {
         externalNativeBuild {
             cmake {
                 cppFlags += "-std=c++17"
-                arguments("-DCMAKE_TOOLCHAIN_FILE=conan_android_toolchain.cmake")
+                abiFilters("x86", "x86_64","armeabi-v7a")
             }
         }
     }
+
+   splits {
+       abi {
+           // Enables building multiple APKs per ABI.
+           isEnable = true
+
+           // By default all ABIs are included, so use reset() and include to specify that you only
+           // want APKs for x86 and x86_64.
+
+           // Resets the list of ABIs for Gradle to create APKs for to none.
+           reset()
+
+           // Specifies a list of ABIs for Gradle to create APKs for.
+           include("x86", "x86_64","armeabi-v7a")
+
+           // Specifies that you don't want to also generate a universal APK that includes all ABIs.
+           isUniversalApk = false
+       }
+   }
 
     buildTypes {
         release {
@@ -86,12 +60,14 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
+
     externalNativeBuild {
         cmake {
             path = file("src/main/cpp/CMakeLists.txt")
             version = "3.22.1"
         }
     }
+
     buildFeatures {
         viewBinding = true
     }
