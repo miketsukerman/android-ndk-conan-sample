@@ -20,7 +20,8 @@ android {
         externalNativeBuild {
             cmake {
                 cppFlags += "-std=c++17"
-                abiFilters("x86", "x86_64","armeabi-v7a")
+                arguments("-DCMAKE_TOOLCHAIN_FILE=app/conan_build/Debug/armeabi-v7a/build/Debug/generators/conan_toolchain.cmake")
+                abiFilters("x86", "x86_64","arm64-v8a","armeabi-v7a")
             }
         }
     }
