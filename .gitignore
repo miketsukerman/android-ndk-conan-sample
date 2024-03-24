@@ -47,3 +47,5 @@ google-services.json
 .externalNativeBuild
 .cxx
 local.properties
+
+CMakeUserPresets.json 

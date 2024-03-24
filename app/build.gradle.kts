@@ -1,6 +1,8 @@
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    id("conan.io") version "1.0-SNAPSHOT"
 }
 
 android {
@@ -9,7 +11,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.myapp"
-        minSdk = 34
+        minSdk = 33
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -18,9 +20,30 @@ android {
         externalNativeBuild {
             cmake {
                 cppFlags += "-std=c++17"
+                arguments("-DCMAKE_TOOLCHAIN_FILE=app/conan_build/Debug/armeabi-v7a/build/Debug/generators/conan_toolchain.cmake")
+                abiFilters("x86", "x86_64","arm64-v8a","armeabi-v7a")
             }
         }
     }
+
+   splits {
+       abi {
+           // Enables building multiple APKs per ABI.
+           isEnable = true
+
+           // By default all ABIs are included, so use reset() and include to specify that you only
+           // want APKs for x86 and x86_64.
+
+           // Resets the list of ABIs for Gradle to create APKs for to none.
+           reset()
+
+           // Specifies a list of ABIs for Gradle to create APKs for.
+           include("x86", "x86_64","armeabi-v7a")
+
+           // Specifies that you don't want to also generate a universal APK that includes all ABIs.
+           isUniversalApk = false
+       }
+   }
 
     buildTypes {
         release {
@@ -38,12 +61,14 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
+
     externalNativeBuild {
         cmake {
             path = file("src/main/cpp/CMakeLists.txt")
             version = "3.22.1"
         }
     }
+
     buildFeatures {
         viewBinding = true
     }
