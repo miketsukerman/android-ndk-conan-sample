@@ -1,6 +1,38 @@
+import java.io.ByteArrayOutputStream
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+}
+
+@Throws(RuntimeException::class)
+fun Project.runConan(buildType: String, arch: String) = ByteArrayOutputStream().use { outputStream ->
+    exec {
+        standardOutput = outputStream
+        workingDir = projectDir
+
+        commandLine("conan","install"
+            ,"src/main/cpp", "--profile","android", "-s", "build_type=$buildType", "-s", "arch=$arch",
+            "--build", "missing", "-c", "tools.cmake.cmake_layout:build_folder_vars=['settings.arch']")
+
+    }.let { result ->
+        when {
+            result.exitValue != 0 -> throw RuntimeException("Conan failed.")
+            else -> outputStream.toString()
+                .trim()
+                .let { "Conan output:\n$it" }
+                .let(::println)
+        }
+    }
+}
+
+// https://docs.conan.io/2.0/examples/cross_build/android/android_studio.html
+tasks.register("conanInstall") {
+    listOf<String>("Debug","Release", "RelWithDebInfo", "MinSizeRel").forEach {buildType ->
+        listOf<String>("armv7", "armv8", "x86", "x86_64").forEach{arch ->
+            runConan(buildType, arch)
+        }
+    }
 }
 
 android {
@@ -18,6 +50,8 @@ android {
         externalNativeBuild {
             cmake {
                 cppFlags += "-std=c++17"
+                cppFlags += "-v"
+                arguments += "-DCMAKE_TOOLCHAIN_FILE=conan_android_toolchain.cmake"
             }
         }
     }
