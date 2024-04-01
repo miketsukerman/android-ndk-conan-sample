@@ -20,7 +20,48 @@ jobs:
         distribution: 'temurin'
         cache: gradle
 
+    - name: Set up Python 3.8
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install conan
+    
+    - name: "Conan detect default profile"
+      run: conan profile detect
+
+    - uses: nttld/setup-ndk@v1
+      id: setup-ndk
+      with:
+        ndk-version: r25c
+        add-to-path: false
+    - name: "Add android profile"
+      env:
+        ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
+      run: |
+        cat <<EOF > ~/.conan2/profiles/android
+          include(default)
+
+          [settings]
+          os=Android
+          os.api_level=21
+          compiler=clang
+          compiler.version=12
+          compiler.libcxx=c++_static
+          compiler.cppstd=14
+
+          [conf]
+          tools.android:ndk_path=$ANDROID_NDK_HOME
+        EOF
+        cat ~/.conan2/profiles/android
+
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
+
+    - name: Prepare conan cache
+      run: ./gradlew conanInstall
+
     - name: Build with Gradle
       run: ./gradlew build
