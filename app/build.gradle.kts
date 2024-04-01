@@ -19,9 +19,8 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
             cmake {
-                cppFlags += "-std=c++17"
-                arguments("-DCMAKE_TOOLCHAIN_FILE=app/conan_build/Debug/armeabi-v7a/build/Debug/generators/conan_toolchain.cmake")
-                abiFilters("x86", "x86_64","arm64-v8a","armeabi-v7a")
+                abiFilters("x86", "x86_64","armeabi-v7a", "arm64-v8a")
+                arguments("-DCMAKE_TOOLCHAIN_FILE=${project.projectDir}/.conan/conan-android-toolchain.cmake")                
             }
         }
     }
@@ -38,7 +37,7 @@ android {
            reset()
 
            // Specifies a list of ABIs for Gradle to create APKs for.
-           include("x86", "x86_64","armeabi-v7a")
+           include("x86", "x86_64","armeabi-v7a", "arm64-v8a")
 
            // Specifies that you don't want to also generate a universal APK that includes all ABIs.
            isUniversalApk = false
@@ -65,7 +64,6 @@ android {
     externalNativeBuild {
         cmake {
             path = file("src/main/cpp/CMakeLists.txt")
-            version = "3.22.1"
         }
     }
 

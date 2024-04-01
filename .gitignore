@@ -46,6 +46,8 @@ google-services.json
 /captures
 .externalNativeBuild
 .cxx
+.conan
 local.properties
 
 CMakeUserPresets.json 
+

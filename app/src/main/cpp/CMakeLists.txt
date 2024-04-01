@@ -1,13 +1,13 @@
-cmake_minimum_required(VERSION 3.22.1)
+cmake_minimum_required(VERSION 3.28)
 
 project(myapp)
 
-find_package(ZLIB REQUIRED)
+find_package(ZLIB REQUIRED CONFIG)
 
-add_library(${CMAKE_PROJECT_NAME} SHARED
+add_library(myapp SHARED
         native-lib.cpp)
 
-target_link_libraries(${CMAKE_PROJECT_NAME}
+target_link_libraries(myapp
         android
         log
         ZLIB::ZLIB
