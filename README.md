@@ -8,6 +8,12 @@ Install NDK
 
 https://developer.android.com/studio/projects/install-ndk
 
+Install conan using pip
+
+```bash
+pip3 install conan
+```
+
 Configure conan
 
 ```bash
