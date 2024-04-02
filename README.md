@@ -41,8 +41,15 @@ EOF
 
 # build 
 
+fetch project dependencies
+
 ```bash
-./gradlew installConan
+./gradlew conanInstall
+```
+
+build project
+
+```bash
 ./gradlew build
 ```
 
