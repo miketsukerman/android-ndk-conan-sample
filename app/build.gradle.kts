@@ -13,7 +13,7 @@ fun Project.runConan(buildType: String, arch: String) = ByteArrayOutputStream().
 
         commandLine("conan","install"
             ,"src/main/cpp", "--profile","android", "-s", "build_type=$buildType", "-s", "arch=$arch",
-            "--build", "missing", "-c", "tools.cmake.cmake_layout:build_folder_vars=['settings.arch']")
+            "--build", "missing")
 
     }.let { result ->
         when {
