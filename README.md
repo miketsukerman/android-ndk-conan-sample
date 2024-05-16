@@ -1,4 +1,4 @@
-# android-ndk-conan-sample
+# Conan + Android NDK
 
 Sample project to play with ndk and conan
 
